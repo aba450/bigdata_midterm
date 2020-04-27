@@ -1,0 +1,177 @@
+﻿{
+  "paragraphs": [
+    {
+      "text": "import spark.implicits._",
+      "user": "anonymous",
+      "dateUpdated": "2020-04-17T03:44:10-0400",
+      "config": {
+        "colWidth": 12,
+        "fontSize": 9,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "import spark.implicits._\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1587109384644_777363395",
+      "id": "paragraph_1587109384644_777363395",
+      "dateCreated": "2020-04-17T03:43:04-0400",
+      "dateStarted": "2020-04-17T03:44:11-0400",
+      "dateFinished": "2020-04-17T03:44:34-0400",
+      "status": "FINISHED",
+      "focus": true,
+      "$$hashKey": "object:1451"
+    },
+    {
+      "text": "import spark.implicits._\r\n\r\nval df_all = spark.read.format(\"csv\").option(\"header\",\"true\").load(\"drive_stats_2019_Q1/*.csv\")\r\nval big_df = df_all.filter($\"date\" =!= \"2019-03-31\")\r\n\r\nval small_df = spark.read.format(\"csv\").option(\"header\",\"true\").\r\n                    load(\"drive_stats_2019_Q1/2019-03-31.csv\")\r\n\r\n        \r\nval bloom_filter = small_df.stat.bloomFilter($\"model\", 1000, 0.0005) //bloom filter for the smaller file with data of 31st March\r\n\r\nval broadcast_filter = spark.sparkContext.broadcast(bloom_filter) // Broadcast the filter\r\n\r\nval res = big_df.rdd.filter(x => broadcast_filter.value.mightContain(x(2))) \r\n\r\n\r\nval res_count = res.count() // count of data models present in both the tables\r\nprintln(\"Data count upto date 30th March 2019 is:  \"+ big_df.count()) \r\nprintln(\"data count for 31st March 2019 is:  \"+ small_df.count()) \r\nprintln(\"Count of rows with models present in both the tables \" +res_count)\r\n\r\ncase class newType(Date: String,Serial_number:String, Model:String, Capacity_bytes:String) extends Serializable\r\n\r\nval result_df = res.map(y => newType(y(0).toString, y(1).toString, y(2).toString,y(3).toString)).toDF() //mapping the values into the result data frame\r\n\r\nresult_df.show()",
+      "user": "anonymous",
+      "dateUpdated": "2020-04-18T18:50:01-0400",
+      "config": {
+        "colWidth": 12,
+        "fontSize": 9,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Data count upto date 30th March 2019 is:  9470808\ndata count for 31st March 2019 is:  106238\nCount of rows with models present in both the tables 9470149\n+----------+--------------+--------------------+--------------+\n|      Date| Serial_number|               Model|Capacity_bytes|\n+----------+--------------+--------------------+--------------+\n|2019-03-05|      Z305B2QN|         ST4000DM000| 4000787030016|\n|2019-03-05|      ZJV0XJQ4|       ST12000NM0007|12000138625024|\n|2019-03-05|      ZJV0XJQ3|       ST12000NM0007|12000138625024|\n|2019-03-05|      ZJV0XJQ0|       ST12000NM0007|12000138625024|\n|2019-03-05|PL1331LAHG1S4H|HGST HMS5C4040ALE640| 4000787030016|\n|2019-03-05|      ZA16NQJR|        ST8000NM0055| 8001563222016|\n|2019-03-05|      ZJV02XWG|       ST12000NM0007|12000138625024|\n|2019-03-05|      ZJV1CSVX|       ST12000NM0007|12000138625024|\n|2019-03-05|      ZJV02XWA|       ST12000NM0007|12000138625024|\n|2019-03-05|      ZA18CEBS|        ST8000NM0055| 8001563222016|\n|2019-03-05|      Z305DEMG|         ST4000DM000| 4000787030016|\n|2019-03-05|      ZA130TTW|         ST8000DM002| 8001563222016|\n|2019-03-05|      ZJV1CSVV|       ST12000NM0007|12000138625024|\n|2019-03-05|      ZA18CEBF|        ST8000NM0055| 8001563222016|\n|2019-03-05|      ZJV02XWV|       ST12000NM0007|12000138625024|\n|2019-03-05|PL2331LAG9TEEJ|HGST HMS5C4040ALE640| 4000787030016|\n|2019-03-05|PL2331LAH3WYAJ|HGST HMS5C4040BLE640| 4000787030016|\n|2019-03-05|PL1331LAHG53YH|HGST HMS5C4040BLE640| 4000787030016|\n|2019-03-05|  88Q0A0LGF97G| TOSHIBA MG07ACA14TA|14000519643136|\n|2019-03-05|PL2331LAHDUVVJ|HGST HMS5C4040BLE640| 4000787030016|\n+----------+--------------+--------------------+--------------+\nonly showing top 20 rows\n\nimport spark.implicits._\n\u001b[1m\u001b[34mdf_all\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.DataFrame\u001b[0m = [date: string, serial_number: string ... 127 more fields]\n\u001b[1m\u001b[34mbig_df\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.Dataset[org.apache.spark.sql.Row]\u001b[0m = [date: string, serial_number: string ... 127 more fields]\n\u001b[1m\u001b[34msmall_df\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.DataFrame\u001b[0m = [date: string, serial_number: string ... 127 more fields]\n\u001b[1m\u001b[34mbloom_filter\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.util.sketch.BloomFilter\u001b[0m = org.apache.spark.util.sketch.BloomFilterImpl@b16249b\n\u001b[1m\u001b[34mbroadcast_filter\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.broadcast.Broadcast[org.apache.spark.util.sketch.BloomFilter]\u001b[0m = Broadcast(36)\n\u001b[1m\u001b[34mres\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.rdd.RDD[org.apache.spark.sql.Row]\u001b[0m = MapPartition..."
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://ammars-air.home:4041/jobs/job?id=11",
+              "$$hashKey": "object:1515"
+            },
+            {
+              "jobUrl": "http://ammars-air.home:4041/jobs/job?id=12",
+              "$$hashKey": "object:1516"
+            },
+            {
+              "jobUrl": "http://ammars-air.home:4041/jobs/job?id=13",
+              "$$hashKey": "object:1517"
+            },
+            {
+              "jobUrl": "http://ammars-air.home:4041/jobs/job?id=14",
+              "$$hashKey": "object:1518"
+            },
+            {
+              "jobUrl": "http://ammars-air.home:4041/jobs/job?id=15",
+              "$$hashKey": "object:1519"
+            },
+            {
+              "jobUrl": "http://ammars-air.home:4041/jobs/job?id=16",
+              "$$hashKey": "object:1520"
+            },
+            {
+              "jobUrl": "http://ammars-air.home:4041/jobs/job?id=17",
+              "$$hashKey": "object:1521"
+            },
+            {
+              "jobUrl": "http://ammars-air.home:4041/jobs/job?id=18",
+              "$$hashKey": "object:1522"
+            },
+            {
+              "jobUrl": "http://ammars-air.home:4041/jobs/job?id=19",
+              "$$hashKey": "object:1523"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1587109450999_1892546811",
+      "id": "paragraph_1587109450999_1892546811",
+      "dateCreated": "2020-04-17T03:44:10-0400",
+      "dateStarted": "2020-04-18T18:50:01-0400",
+      "dateFinished": "2020-04-18T18:55:44-0400",
+      "status": "FINISHED",
+      "$$hashKey": "object:1452"
+    },
+    {
+      "text": "",
+      "user": "anonymous",
+      "dateUpdated": "2020-04-18T17:59:42-0400",
+      "config": {
+        "colWidth": 12,
+        "fontSize": 9,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1587109501579_-884734622",
+      "id": "paragraph_1587109501579_-884734622",
+      "dateCreated": "2020-04-17T03:45:01-0400",
+      "status": "READY",
+      "$$hashKey": "object:1453"
+    }
+  ],
+  "name": "aba450_ammarayaz_4",
+  "id": "2F85V822Y",
+  "defaultInterpreterGroup": "spark",
+  "version": "0.9.0-preview1",
+  "noteParams": {},
+  "noteForms": {},
+  "angularObjects": {},
+  "config": {
+    "isZeppelinNotebookCronEnable": false,
+    "looknfeel": "default",
+    "personalizedMode": "false"
+  },
+  "info": {},
+  "path": "/aba450_ammarayaz_4"
+}
